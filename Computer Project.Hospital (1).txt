@@ -1,0 +1,918 @@
+#include<conio.h>
+#include<dos.h>
+#include<string.h>
+#include<fstream.h>
+#include<stdio.h>
+struct mydate
+{
+	int dd,mm,yy;
+};
+class doctor
+{
+	private:
+		int id;
+		char name[20];
+		char sex;
+		char special[20];
+		int fee;
+		int count;
+	public:
+		void getdata_doctor(int di)
+		{
+			id=di;
+			cout<<”\n Doctor Id "<<id;
+			cout<<"\n Enter Doctor name ";
+			gets(name);
+			cout<<"\n Enter Sex ";
+			cin>>sex;
+			cout<<"\n Enter speciality ";
+			gets(special);
+			cout<<"\n Enter Fee ";
+			cin>>fee;
+			count=0;
+		}
+		void showdata_doctor()
+		{
+			cout<<endl<<id;
+			cout<<endl<<name;
+			cout<<endl<<sex;
+			cout<<endl<<special;
+			cout<<endl<<fee;
+		}
+		int get_doctorid()
+		{
+			return id;
+		}
+		char *get_doctorname()
+		{
+			return name;
+		}
+		char *get_doctorspecial()
+		{
+			return special;
+		}
+		float get_doctorfee()
+		{
+			return fee;
+		}
+		void setfee(float f)
+		{
+			fee=f;
+		}
+};
+
+class room
+{
+	private:
+		int roomno;
+		char type[20];
+		int charges;
+		char status;
+	public:
+		void getdata_room(int rn)
+		{
+			roomno=rn;
+			cout<<"\n Room no  "<<roomno;
+			cout<<"\n Enter type ";
+			gets(type);
+			cout<<"\n Enter Charges ";
+			cin>>charges;
+			status='v';
+		}
+		void showdata_room(int row)
+		{
+			cout<<endl<<roomno;
+			cout<<endl<<type;
+			cout<<endl<<charges;
+			cout<<endl<<status;
+		}
+		int get_roomno()
+		{
+			return roomno;
+		}
+		void setcharges(int c)
+		{
+			charges=c;
+		}
+		int get_roomcharges()
+		{
+			return charges;
+		}
+		char get_status()
+		{
+			return status;
+		}
+		void set_status(char s)
+		{
+			status=s;
+		}
+};
+
+class  patient
+{
+	private:
+		int id;
+		char name[20];
+		char sex;
+		char dis[20];
+		int docid;
+		int rid;
+		mydate admitdate;
+		int fee;
+	public:
+		void getdata_patient(int i,char nm[],char s,char ds[],int idd,int rno,mydate dt,int f)
+		{
+			id=i;
+			strcpy(name,nm);
+			sex=s;
+			strcpy(dis,ds);
+			docid=idd;
+			rid=rno;
+			admitdate=dt;
+			fee=f;
+		}
+		char *getdisease()
+		{
+			return dis;
+		}
+		int getdocid()
+		{
+			return docid;
+		}
+		int getroomid()
+		{
+			return rid;
+		}
+		mydate getaddate()
+		{
+			return admitdate;
+		}
+		char *getname()
+		{
+			return name;
+		}
+		char getsex()
+		{
+			return sex;
+		}
+		int getfee()
+		{
+			return fee;
+		}
+		int getid_patient()
+		{
+			return id;
+		}
+		void showdata_patient()
+		{
+			cout<<endl<<id;
+			cout<<endl<<name;
+			cout<<endl<<sex;
+			cout<<endl<<dis;
+			cout<<endl<<docid;
+			cout<<endl<<rid;
+			cout<<endl<<admitdate.dd<<"/"<<admitdate.mm<<"/"<<admitdate.yy;
+		}
+};
+
+int last_doctorid()
+{
+	ifstream f;
+	doctor d;
+	int id=0;
+	f.open("doctor.dat",ios::binary);
+	while(f.read((char *)&d,sizeof(d)))
+	{
+		id=d.get_doctorid();
+	}
+	f.close();
+	return id;
+}
+void add_doctor()
+{
+	ofstream f;
+	doctor d;
+	int id=last_doctorid()+1;
+	f.open("doctor.dat",ios::binary|ios::app);
+	d.getdata_doctor(id);
+	f.write((char *)&d,sizeof(d));
+	f.close();
+}
+
+void showall_doctor()
+{
+	ifstream f;
+	doctor d;
+	f.open("doctor.dat",ios::binary);
+	while(f.read((char *)&d,sizeof(d)))
+	{
+		d.showdata_doctor();
+	}
+	f.close();
+}
+
+void search_doctor()
+{
+	ifstream f;
+	doctor d;
+	int id,flag=0;
+	cout<<endl<<”Enter doctor id ";
+	cin>>id;
+	f.open("doctor.dat",ios::binary);
+	while(f.read((char *)&d,sizeof(d)))
+	{
+		if(id==d.get_doctorid())
+		{
+			d.showdata_doctor();
+			flag=1;
+			break;
+		}
+	}
+	f.close();
+	if(flag==0)
+	{
+		cout<<endl<<”Sorry doctor not found ";
+	}
+}
+
+int check_doctor(int id)
+{
+	ifstream f;
+	doctor d;
+	int flag=0;
+	f.open("doctor.dat",ios::binary);
+	while(f.read((char *)&d,sizeof(d)))
+	{
+		if(id==d.get_doctorid())
+		{
+			flag=1;
+			break;
+		}
+	}
+	f.close();
+	return flag;
+}
+
+void modify_doctor()
+{
+	fstream f;
+	doctor d;
+	int id,flag=0;
+	float nfee;
+	cout<<endl<<”Enter doctor id ";
+	cin>>id;
+	f.open("doctor.dat",ios::binary|ios::in|ios::out);
+	while(f.read((char *)&d,sizeof(d)))
+	{
+		if(id==d.get_doctorid())
+		{
+			d.showdata_doctor();
+			cout<<endl<<”Enter new fee ";
+			cin>>nfee;
+			d.setfee(nfee);
+			f.seekp(f.tellg()-sizeof(d),ios::beg);
+			f.write((char *)&d,sizeof(d));
+			flag=1;
+			break;
+		}
+	}
+	f.close();
+	if(flag==0)
+	{
+		cout<<endl<<”Sorry doctor not found ";
+	}
+}
+
+int last_roomno()
+{
+	ifstream f;
+	room r;
+	int rn=0;
+	f.open("room.dat",ios::binary);
+	while(f.read((char *)&r,sizeof(r)))
+	{
+		rn=r.get_roomno();
+	}
+	f.close();
+	return rn;
+}
+void add_room()
+{
+	ofstream f;
+	room r;
+	int rn=last_roomno()+1;
+	f.open("room.dat",ios::binary|ios::app);
+	r.getdata_room(rn);
+	f.write((char *)&r,sizeof(r));
+	f.close();
+}
+
+void showall_room()
+{
+	ifstream f;
+	room r;
+	f.open("room.dat",ios::binary);
+	while(f.read((char *)&r,sizeof(r)))
+	{
+		r.showdata_room();
+	}
+	f.close();
+}
+
+void search_room()
+{
+	ifstream f;
+	room r;
+	int rn,flag=0;
+	cout<<endl<<”Enter room no ";
+	cin>>rn;
+	f.open("room.dat",ios::binary);
+	while(f.read((char *)&r,sizeof(r)))
+	{
+		if(rn==r.get_roomno())
+		{
+			r.showdata_room();
+			flag=1;
+			break;
+		}
+	}
+	f.close();
+	if(flag==0)
+	{
+		cout<<endl<<”Sorry room not found ";
+	}
+}
+
+int findrent(int rno)
+{
+	ifstream f;
+	room r;
+	int rent;
+	f.open("room.dat",ios::binary);
+	while(f.read((char *)&r,sizeof(r)))
+	{
+		if(rno==r.get_roomno())
+		{
+			rent=r.get_roomcharges();
+			break;
+		}
+	}
+	f.close();
+	return rent;
+}
+
+void modify_room()
+{
+	fstream f;
+	room r;
+	int rn,flag=0,ncharges;
+	cout<<endl<<”Enter room no ";
+	cin>>rn;
+	f.open("room.dat",ios::binary);
+	while(f.read((char *)&r,sizeof(r)))
+	{
+		if(rn==r.get_roomno())
+		{
+			r.showdata_room();
+			cout<<endl<<”Enter new charges ";
+			cin>>ncharges;
+			r.setcharges(ncharges);
+			f.seekp(f.tellg()-sizeof(r),ios::beg);
+			f.write((char *)&r,sizeof(r));
+			flag=1;
+			break;
+		}
+	}
+	f.close();
+	if(flag==0)
+	{
+		cout<<endl<<”Sorry room not found ";
+	}
+}
+
+void showall_patient()
+{
+	ifstream f;
+	patient p;
+	f.open("patient.dat",ios::binary);
+
+	while(f.read((char *)&p,sizeof(p)))
+	{
+		p.showdata_patient();
+	}
+	f.close();
+}
+
+void search_patient()
+{
+	ifstream f;
+	patient p;
+	int pid,flag=0;
+	f.open("patient.dat",ios::binary);
+	cout<<endl<<”Enter patient id ";
+	cin>>pid;
+	while(f.read((char *)&p,sizeof(p)))
+	{
+		if(pid==p.getid_patient())
+		{
+			p.showdata_patient();
+			flag=1;
+			break;
+		}
+	}
+	f.close();
+	if(flag==0)
+	{
+		cout<<endl<<”Sorry patient not found ";
+	}
+}
+
+int check_patientid(int pid)
+{
+	ifstream f;
+	patient p;
+	int flag=0;
+	f.open("patient.dat",ios::binary);
+	while(f.read((char *)&p,sizeof(p)))
+	{
+		if(pid==p.getid_patient())
+		{
+			flag=1;
+			break;
+		}
+	}
+	f.close();
+	return flag;
+}
+
+int last_patientid()
+{
+	ifstream f;
+	patient p;
+	int id=0;
+	f.open("patient.dat",ios::binary);
+	while(f.read((char *)&p,sizeof(p)))
+	{
+		id=p.getid_patient();
+	}
+	f.close();
+	return id;
+}
+
+float getdoctorfee(int id)
+{
+	ifstream f;
+	doctor d;
+	float fee;
+	f.open("doctor.dat",ios::binary);
+	while(f.read((char *)&d,sizeof(d)))
+	{
+		if(d.get_doctorid()==id)
+		{
+			fee=d.get_doctorfee();
+		}
+	}
+	f.close();
+	return fee;
+}
+
+void admission()
+{
+	int id,did;
+	float fee;
+	struct date sd;
+	getdate(&sd);
+	mydate cd;
+	cd.yy= sd.da_year;
+	cd.dd=sd.da_day;
+	cd.mm= sd.da_mon;
+	char name[20],sex,dis[20],dname[20];
+	id=last_patientid()+1;
+	cout<<endl<<”Date :"<<cd.dd<<"-"<<cd.mm<<"-"<<cd.yy;
+	cout<<endl<<”Patient id: "<<id ;
+	cout<<endl<<”Enter name: ";
+	gets(name);
+	cout<<endl<<”Enter sex: “;
+	cin>>sex;
+	cout<<endl<<”Enter diease: ”;
+	gets(dis);
+	ifstream f;
+	doctor d;
+	f.open("doctor.dat",ios::binary);
+	while(f.read((char *)&d,sizeof(d)))
+	{
+		if(strcmp(dis,d.get_doctorspecial())==0)
+		{
+			cout<<endl<<d.get_doctorid()<<"  "<<d.get_doctorname()<<endl;
+		}
+	}
+	f.close();
+	cout<<"Enter doctor id from list ";
+	cin>>did;
+	fee=getdoctorfee(did);
+	cout<<endl<<”Doctor Fee "<<fee<<endl;
+
+	ifstream fr;
+	room r;
+	f.open("room.dat",ios::binary);
+	while(f.read((char *)&r,sizeof(r)))
+	{
+		if(r.get_status()=='v')
+		{
+			cout<<endl<<r.get_roomno()<<"  "<<r.get_roomcharges()<<endl;
+		}
+	}
+	f.close();
+	cout<<endl<<”Enter room id ";
+	cin>>rno;
+
+	ofstream fp;
+	fp.open("patient.dat",ios::binary|ios::app);
+	patient op;
+	op.getdata_patient(id,name,sex,dis,did,rno,cd,fee);
+	fp.write((char *)&op,sizeof(op));
+	fp.close();
+
+	fstream fr1;
+	fr1.open("room.dat",ios::binary|ios::in|ios::out);
+	while(fr1.read((char *)&r,sizeof(r)))
+	{
+		if(rno==r.get_roomno())
+		{
+			fr1.seekp(fr1.tellg()-sizeof(r),ios::beg);
+			r.set_status('o');
+			fr1.write((char *)&r,sizeof(r));
+			break;
+		}
+	}
+	fr1.close();
+}
+
+//int find_diff(mydate d1,mydate d2)
+{
+	int i=0;
+	while((d1.yy==d2.yy && d1.mm==d2.mm && d1.dd<d2.dd)||
+		(d1.yy==d2.yy && d1.mm<d2.mm) ||
+		(d1.yy<d2.yy))
+	{
+		i++;
+		d1.dd++;
+		switch(d1.mm)
+		{
+			case 1:
+			case 3:
+			case 5:
+			case 7:
+			case 8:
+			case 10:
+				if(d1.dd>31)
+				{
+					d1.dd=1;
+					d1.mm++;
+				}
+			break;
+			case 12:
+				if(d1.dd>31)
+				{
+					d1.dd=1;
+					d1.mm=1;
+					d1.yy++;
+				}
+			break;
+			case 4:
+			case 6:
+			case 9:
+			case 11:
+				if(d1.dd>30)
+				{
+					d1.dd=1;
+					d1.mm++;
+				}
+			break;
+			case 2:
+				if(d1.yy%4==0)
+				{
+					if(d1.dd>29)
+					{
+						d1.dd=1;
+						d1.mm++;
+					}
+				}
+				else
+				{
+					if(d1.dd>28)
+					{
+						d1.dd=1;
+						d1.mm++;
+					}
+				}
+			break;
+		}
+	}
+	return i;
+}//
+
+//void discharge()
+{
+	int id,did,row=2,row1,rno;
+	float fee;
+	struct date sd;
+	getdate(&sd);
+	mydate cd,ad;
+	cd.yy= sd.da_year;
+	cd.dd= sd.da_day;
+	cd.mm= sd.da_mon;
+	char name[20],sex,dis[20],dname[20];
+	cout<<"Date :"<<cd.dd<<"-"<<cd.mm<<"-"<<cd.yy;
+	gotoxy(3,++row);
+	cout<<"Enter Patient id ";
+	cin>>id ;
+	if(check_patientid(id)==0)
+	{
+		gotoxy(3,++row);
+		cout<<"Enter correct patient id ";
+		return;
+	}
+	ifstream fp;
+	patient p;
+	fp.open("patient.dat",ios::binary);
+	while(fp.read((char *)&p,sizeof(p)))
+	{
+		if(id==p.getid_patient())
+		{
+			strcpy(name,p.getname());
+			sex=p.getsex();
+			strcpy(dis,p.getdisease());
+			did=p.getdocid();
+			fee=p.getfee();
+			rno=p.getroomid();
+			ad=p.getaddate();
+			break;
+		}
+	}
+	fp.close();
+	int rent=findrent(rno);
+	cout<<"Name "<<name<<endl;
+	cout<<"Sex "<<sex<<endl;
+	cout<<"Diease "<<dis<<endl;
+	cout<<"Doctor id "<<did<<endl;
+	cout<<"Doctor Fee "<<fee<<endl;
+	cout<<"Room id "<<rno<<endl;
+	cout<<"Admid date "<<ad.dd<<"/"<<ad.mm<<"/"<<ad.yy<<endl;
+	int days=find_diff(ad,cd);
+	if(days==0)
+		days=1;
+	cout<<"Total Days "<<days<<endl;
+	cout<<"Total Doc Fee "<<days*fee<<endl;
+	cout<<"Total room rent"<<days*rent<<endl;
+	int amount=days*(fee+rent);
+	cout<<"Total amount "<<amount<<endl;
+
+	fstream fr1;
+	room r;
+	fr1.open("room.dat",ios::binary|ios::in|ios::out);
+	while(fr1.read((char *)&r,sizeof(r)))
+	{
+		if(rno==r.get_roomno())
+		{
+			fr1.seekp(fr1.tellg()-sizeof(r),ios::beg);
+			r.set_status('v');
+			fr1.write((char *)&r,sizeof(r));
+			break;
+		}
+	}
+	fr1.close();
+
+	ofstream fpp;
+	fp.open("patient.dat",ios::binary);
+	fpp.open("temp.dat",ios::binary);
+	while(fp.read((char *)&p,sizeof(p)))
+	{
+		if(id!=p.getid_patient())
+		{
+			fpp.write((char *)&p,sizeof(p));
+		}
+	}
+	fp.close();
+	fpp.close();
+	remove("patient.dat");
+	rename("temp.dat","patient.dat");
+}//
+
+
+void menu_doctor()
+{
+	char op;
+	do
+	{
+		clrscr();
+		cout<<"1 Add “<<endl;
+		cout<<"2 Modify “<<endl;
+		cout<<"0 Back “<<endl;
+		cout<<"Enter choice “<<endl;
+		cin>>op;
+		switch(op)
+		{
+			case '1':
+				clrscr();
+				add_doctor();
+			break;
+			case '2':
+				clrscr();
+				modify_doctor();
+			break;
+			default:
+				break;
+		}
+		cout<<“TO CONTINUE ENER ANY NO(except 0);
+		cin>>op;
+	}while(op!='0');
+}
+
+void menu_patient()
+{
+	char op;
+	do
+	{
+		clrscr();
+		cout<<"1 Admision “<<endl;
+		cout<<"2 Discharge “<<endl;
+		cout<<"0 Back “<<endl;
+		cout<<"Enter choice “<<endl;
+		cin>>op;
+		switch(op)
+		{
+			case '1':
+				clrscr();
+				admission();
+			break;
+			case '2':
+				clrscr();
+				discharge();
+			break;
+			default:
+				break;
+		}
+		cout<<“TO CONTINUE ENER ANY NO(except 0);
+		cin>>op;
+	}while(op!='0');
+}
+
+void menu_room()
+{
+	char op;
+	do
+	{
+		clrscr();
+		cout<<"1 Add “<<endl;
+		cout<<"2 Modify “<<endl;
+		cout<<"0 Back “<<endl;
+		cout<<"Enter choice “<<endl;
+		cin>>op;
+		switch(op)
+		{
+			case '1':
+				clrscr();
+				add_room();
+			break;
+			case '2':
+				clrscr();
+				modify_room();
+			break;
+			default:
+				break;
+		}
+		cout<<“TO CONTINUE ENER ANY NO(except 0);
+		cin>>op;
+	}while(op!='0');
+}
+
+void menu_query()
+{
+	char op;
+	do
+	{
+		clrscr();
+		cout<<"1 Doctor”<<endl;
+		cout<<"2 Room “<<endl;
+		cout<<"3 Patient “<<endl;
+		cout<<"0 Back “<endl;
+		cout<<"Enter choice ";
+		cin>>op;
+		switch(op)
+		{
+			case '1':
+				clrscr();
+				search_doctor();
+			break;
+			case '2':
+				clrscr();
+				search_room();
+			break;
+			case '3':
+				clrscr();
+				search_patient();
+			break;
+			default:
+				break;
+		}
+		cout<<“TO CONTINUE ENER ANY NO(except 0);
+		cin>>op;
+	}while(op!='0');
+}
+
+void menu_report()
+{
+	char op;
+	do
+	{
+		clrscr();
+		cout<<"1 Doctor”<<endl;
+		cout<<"2 Room “<<endl;
+		cout<<"3 Patient “<<endl;
+		cout<<"0 Back “<<endl;
+		cout<<"Enter choice “<<endl;
+		cin>>op;
+		switch(op)
+		{
+			case '1':
+				clrscr();
+				showall_doctor();
+			break;
+			case '2':
+				clrscr();
+				showall_room();
+			break;
+			case '3':
+				clrscr();
+				showall_patient();
+			break;
+			default:
+				break;
+			
+		}
+		cout<<“TO CONTINUE ENER ANY NO(except 0);
+		cin>>op;
+	}while(op!='0');
+}
+
+void menu_main()
+{
+	char op;
+	do
+	{
+		clrscr();
+		cout<<"1 Doctor”<<endl;
+		cout<<"2 Room “<<endl;
+		cout<<"3 Patient “<<endl;
+		cout<<"4 Query “<<endl;
+		cout<<"5 Report “<<endl;
+		cout<<"0 Exit “<<endl;
+		cout<<"Enter choice ";
+		cin>>op;
+		switch(‘op’)
+		{
+			case ‘1’:
+				menu_doctor();
+			break;
+			case ‘2’:
+				menu_room();
+			break;
+			case ‘3’:
+				menu_patient();
+			break;
+			case ‘4’:
+				menu_query();
+			break;
+			case ‘5’:
+				menu_report();
+			break;
+			default:
+				cout<<“WRONG CHOICE”;
+			break;
+		}
+		cout<<“TO CONTINUE PRESS ANY(except 0)”<<endl<<“TO TERMINATE ENTER ZERO”<<endl;
+		cin>>op;	
+	}while(op!=0);
+}
+
+void welcome()
+{
+	clrscr();
+	cout<<setw(40)<<”WELCOME”<<endl;
+	cout<<setw(40)<<”TO”<<endl;
+	cout<<setw(40)<<”ISHANSH”<<endl;
+	cout<<setw(40)<<”CLINIC”<<endl;
+	cout<<setw(40)<<”HOSPITAL”<<endl;
+	cout<<"Press any key to continue........";
+	getch();
+}
+
+void main()
+{
+     welcome();
+     menu_main();
+     getch();
+}
+
+
